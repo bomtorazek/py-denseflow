@@ -21,7 +21,9 @@ pip install -r requirements.txt
 
 ```
 conda 환경을 사용하실 경우: yaml로 environment를 드릴까 했으나 
+
 requirements_linux.txt 또는 requirements_windows.txt에 있는 
+
 제가 쓴 bash script를 복붙하시는게 더 정확할 것 같습니다.
 
 ---
@@ -31,16 +33,22 @@ The denseflow.py contains two modes including '**run**' and '**debug**'.
 
 
 here 'debug' is built for debugging the video paths and video-read methods. ([IPython.embed](http://ipython.org/ipython-doc/dev/interactive/reference.html#embedding) suggested)
+
 debug는 그냥 영상 하나만 잘 되는지 확인 해보는 모드입니다.
 
-Just simply run the following code: (예시)
+Just simply run the following code: 
+data_root와 dataset을 밑의 경로를 보시며 적절히 수정해주세요
+마지막 commit을 windows 환경에서는 검증하지 못했으니 확인 부탁드립니다.
 
 ```
 python denseflow.py --data_root=/home/esuh/data/ --dataset=cvpr/Track2.1/Train --new_dir=flows --step=1 --mode=run
-python denseflow_rgb.py --data_root=/home/esuh/data/ --dataset=cvpr/Track2.1/Train --new_dir=flows --step=1 --mode=run --rejection=completed.txt
-python denseflow_rgb.py --data_root=/home/esuh/data/ --dataset=cvpr/Track2.1/Validation --new_dir=flows --step=1 --mode=run --validation
+
+--rejection=completed.txt : 이미 완료된 항목을 배제합니다.
+--validation : validation frame 추출시 동영상 경로가 조금 달라서 이 parse를 추가해야 합니다.
+--modality: rgb, flow, both 중에 추출할 frames을 선택할 수 있습니다.
 
 ```
+
 ```
 data
 ----cvpr
@@ -59,6 +67,7 @@ data
                        ----0.mp4
                        ----1.mp4
                  ----flows (여기에 frame들이 만들어집니다. 폴더도 자동으로 만들어집니다.)
+flows 아래에는 각 클립이름의 폴더가 생기며 그 아래에 img_00001.jpg, flow_x_00001.jpg, flow_y_00001.jpg가 만들어집니다.
 ```
 
 
