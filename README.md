@@ -37,7 +37,9 @@ here 'debug' is built for debugging the video paths and video-read methods. ([IP
 debug는 그냥 영상 하나만 잘 되는지 확인 해보는 모드입니다.
 
 Just simply run the following code: 
+
 data_root와 dataset을 밑의 경로를 보시며 적절히 수정해주세요
+
 마지막 commit을 windows 환경에서는 검증하지 못했으니 확인 부탁드립니다.
 
 ```
