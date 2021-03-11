@@ -1,0 +1,23 @@
+git clone https://github.com/bomtorazek/py-denseflow.git
+cd py-denseflow
+conda create -n tv-l1
+y
+conda activate tv-l1
+conda install -c anaconda numpy
+y
+conda install -c conda-forge opencv
+y
+conda install -c anaconda pillow
+y
+conda install -c conda-forge multiprocess
+y
+conda install -c conda-forge scikit-video
+y
+conda install -c anaconda scipy
+y
+conda install -c anaconda ipython
+y
+conda install -c conda-forge imageio
+y
+conda install -c conda-forge ffmpeg
+y 

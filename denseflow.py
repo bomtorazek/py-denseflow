@@ -36,32 +36,29 @@ def save_flows(flows,image,save_dir,num,bound):
     :return: return 0
     '''
     #rescale to 0~255 with the bound setting
-    flow_x=ToImg(flows[...,0],bound)
-    flow_y=ToImg(flows[...,1],bound)
+    if FLOW:
+        flow_x=ToImg(flows[...,0],bound)
+        flow_y=ToImg(flows[...,1],bound)
     if not os.path.exists(os.path.join(data_root,new_dir,save_dir)):
         os.makedirs(os.path.join(data_root,new_dir,save_dir))
 
     #save the image
-    save_img=os.path.join(data_root,new_dir,save_dir,'img_{:05d}.jpg'.format(num))
-    # scipy.misc.imsave(save_img,image)
-    # print(1)
-    imageio.imwrite(save_img, image)
-    # print(2)
+    if RGB:
+        save_img=os.path.join(data_root,new_dir,save_dir,'img_{:05d}.jpg'.format(num))
+        # scipy.misc.imsave(save_img,image)
+        imageio.imwrite(save_img, image)
     #save the flows
-    save_x=os.path.join(data_root,new_dir,save_dir,'flow_x_{:05d}.jpg'.format(num))
-    save_y=os.path.join(data_root,new_dir,save_dir,'flow_y_{:05d}.jpg'.format(num))
-    # print(3)
-    flow_x = flow_x.astype('uint8')
-    flow_y = flow_x.astype('uint8')
-    flow_x_img=Image.fromarray(flow_x)
-    # print(4)
-    flow_y_img=Image.fromarray(flow_y)
-    # print(5)
-    imageio.imwrite(save_x,flow_x_img)
-    # print(6)
-    imageio.imwrite(save_y,flow_y_img)
-    # scipy.misc.imsave(save_x,flow_x_img)
-    # scipy.misc.imsave(save_y,flow_y_img)
+    if FLOW:
+        save_x=os.path.join(data_root,new_dir,save_dir,'flow_x_{:05d}.jpg'.format(num))
+        save_y=os.path.join(data_root,new_dir,save_dir,'flow_y_{:05d}.jpg'.format(num))
+        flow_x = flow_x.astype('uint8')
+        flow_y = flow_x.astype('uint8')
+        flow_x_img=Image.fromarray(flow_x)
+        flow_y_img=Image.fromarray(flow_y)
+        imageio.imwrite(save_x,flow_x_img)
+        imageio.imwrite(save_y,flow_y_img)
+        # scipy.misc.imsave(save_x,flow_x_img)
+        # scipy.misc.imsave(save_y,flow_y_img)
     return 0
 
 def dense_flow(augs):
@@ -75,13 +72,14 @@ def dense_flow(augs):
     :return: no returns
     '''
     videos_root, video_name,save_dir,step,bound=augs
-   
-    video_path=os.path.join(videos_root,video_name.split('_')[0],video_name)
+    if not args.validation:
+        video_path=os.path.join(videos_root,video_name.split('_')[0],video_name)
+    else:
+        video_path=os.path.join(videos_root,video_name)
     
     while '\\' in video_path:
-        print(video_path)
         video_path = video_path.replace('\\','/') # for windows
-    
+    print("video_path:",video_path)
     
     # provide two video-read methods: cv2.VideoCapture() and skvideo.io.vread(), both of which need ffmpeg support
 
@@ -95,7 +93,7 @@ def dense_flow(augs):
     except:
         print('{} read error! '.format(video_name))
         return 0
-    print(video_name)
+    print("video name:",video_name)
     # if extract nothing, exit!
     if videocapture.sum()==0:
         print('Could not initialize capturing',video_name)
@@ -126,13 +124,17 @@ def dense_flow(augs):
             continue
 
         image=frame
-        gray=cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
-        frame_0=prev_gray
-        frame_1=gray
-        ##default choose the tvl1 algorithm
-        dtvl1=cv2.createOptFlow_DualTVL1()
-        flowDTVL1=dtvl1.calc(frame_0,frame_1,None)
-        save_flows(flowDTVL1,image,save_dir,frame_num,bound) #this is to save flows and img.
+        if FLOW:
+            gray=cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)        
+            frame_0=prev_gray
+            frame_1=gray
+            ##default choose the tvl1 algorithm
+            dtvl1=cv2.createOptFlow_DualTVL1()
+            flowDTVL1=dtvl1.calc(frame_0,frame_1,None)
+            save_flows(flowDTVL1,image,save_dir,frame_num,bound) #this is to save flows and img.
+        else:
+            save_flows(None,image, save_dir,frame_num,bound) #this is to save flows and img.
+        
         prev_gray=gray
         prev_image=image
         frame_num+=1
@@ -144,22 +146,30 @@ def dense_flow(augs):
             step_t-=1
 
 
-def get_video_list(reject):
+def get_video_list(is_val, reject):
     video_list=[]
-    for cls_names in os.listdir(videos_root):
-        cls_path=os.path.join(videos_root,cls_names)
-        for video_ in os.listdir(cls_path):
+    if not is_val:
+        for cls_names in os.listdir(videos_root):
+            cls_path=os.path.join(videos_root,cls_names)
+            for video_ in os.listdir(cls_path):
+                video_list.append(video_)
+        video_list.sort()
+        length  =len(video_list)
+    else:
+        for video_ in os.listdir(videos_root):
             video_list.append(video_)
-    video_list.sort()
+        video_list.sort()
+    
     length  =len(video_list)
-    with open(reject, 'r') as f:
-        lines = f.readlines()
-        for row in lines:
-            row = row.split()
-            for vdo in row:
-                if vdo.strip()+'.mp4' in video_list:
-                    video_list.remove(vdo.strip()+'.mp4')
-    print(length-len(video_list),"videos were already completed")
+    if reject:
+        with open(reject, 'r') as f:
+            lines = f.readlines()
+            for row in lines:
+                row = row.split()
+                for vdo in row:
+                    if vdo.strip()+'.mp4' in video_list:
+                        video_list.remove(vdo.strip()+'.mp4')
+        print(length-len(video_list),"videos were already completed")
     return video_list,len(video_list)
 
 
@@ -169,13 +179,15 @@ def parse_args():
     parser.add_argument('--dataset',default='ucf101',type=str,help='set the dataset name, to find the data path')
     parser.add_argument('--data_root',default='/n/zqj/video_classification/data',type=str)
     parser.add_argument('--new_dir',default='flows',type=str)
-    parser.add_argument('--num_workers',default=4,type=int,help='num of workers to act multi-process')
+    # parser.add_argument('--num_workers',default=4,type=int,help='num of workers to act multi-process')
     parser.add_argument('--step',default=1,type=int,help='gap frames')
     parser.add_argument('--bound',default=15,type=int,help='set the maximum of optical flow')
     parser.add_argument('--s_',default=0,type=int,help='start id')
     parser.add_argument('--e_',default=13320,type=int,help='end id')
     parser.add_argument('--mode',default='run',type=str,help='set \'run\' if debug done, otherwise, set debug')
-    parser.add_argument('--rejection',type=str)
+    parser.add_argument('--rejection',default ='',type=str)
+    parser.add_argument('--validation',action='store_true')
+    parser.add_argument('--modality',default='both', choices=['both', 'rgb', 'flow'])
     args = parser.parse_args()
     return args
 
@@ -187,6 +199,7 @@ if __name__ =='__main__':
     #data_root=os.path.join(data_root,dataset)
 
     args=parse_args()
+    global data_root, videos_root
     data_root=os.path.join(args.data_root,args.dataset)
     videos_root=os.path.join(data_root,'videos')
 
@@ -196,18 +209,31 @@ if __name__ =='__main__':
     bound=args.bound
     s_=args.s_
     e_=args.e_
+    global new_dir
     new_dir=args.new_dir
     mode=args.mode
     #get video list
-    video_list,len_videos=get_video_list(args.rejection)
+    video_list,len_videos=get_video_list(args.validation, args.rejection)
     # video_list=video_list[s_:e_]
     
 
-    len_videos=min(len_videos-s_,13320-s_) # if we choose the ucf101
+    len_videos=min(len_videos-s_,13320-s_) 
     print('find {} videos.'.format(len_videos))
     flows_dirs=[video.split('.')[0] for video in video_list]
     videos_root_list = [videos_root for _ in range(len(video_list))]
     print('get videos list done! ')
+
+    global RGB,FLOW
+    RGB = 0
+    FLOW = 0
+
+    if args.modality == 'rgb':
+        RGB = 1
+    elif args.modality == 'flow':
+        FLOW = 1
+    else:
+        RGB = 1
+        FLOW = 1
 
     pool=Pool()
     if mode=='run': 
