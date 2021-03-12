@@ -18,13 +18,13 @@ This is a python port of denseflow, which extract the videos' frames and **optic
 #### Install the requirements:
 ```
 pip install -r requirements.txt
-
+conda 환경을 사용하실 경우:
+conda env create -f environment_tvl1_linux.yml
+conda env create -f environment_tvl1_windows.yml
 ```
-conda 환경을 사용하실 경우: yaml로 environment를 드릴까 했으나 
+위의 방법이 안 될 경우 requirements_linux.txt 또는 requirements_windows.txt에 있는 
 
-requirements_linux.txt 또는 requirements_windows.txt에 있는 
-
-제가 쓴 bash script를 복붙하시는게 더 정확할 것 같습니다.
+제가 쓴 bash script를 복붙하시는 방법도 있습니다.
 
 ---
 
