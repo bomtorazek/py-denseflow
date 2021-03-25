@@ -61,7 +61,7 @@ def save_flows(flows,image,save_dir,num,bound):
         # scipy.misc.imsave(save_y,flow_y_img)
     return 0
 
-def dense_flow(augs):
+def dense_flow(args):
     '''
     To extract dense_flow images
     :param augs:the detailed augments:
