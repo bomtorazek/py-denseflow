@@ -72,11 +72,22 @@ def dense_flow(augs):
     :return: no returns
     '''
     videos_root, video_name,save_dir,step,bound=augs
-    if not args.validation:
-        video_path=os.path.join(videos_root,video_name.split('_')[0],video_name)
+    if not args.semi:
+        if not args.validation:
+            video_path=os.path.join(videos_root,video_name.split('_')[0],video_name)
+        else:
+            video_path=os.path.join(videos_root,video_name)
     else:
-        video_path=os.path.join(videos_root,video_name)
-    
+        cls_list = ['drink',  'jump',  'pick',  'pour',  'push']
+        if not args.validation:
+            for cls in cls_list:
+                if cls in video_name:
+                    lbl = cls
+            video_path=os.path.join(videos_root,lbl,video_name)
+        else:
+            video_path=os.path.join(videos_root,video_name)
+
+
     while '\\' in video_path:
         video_path = video_path.replace('\\','/') # for windows
     print("video_path:",video_path)
@@ -187,6 +198,7 @@ def parse_args():
     parser.add_argument('--mode',default='run',type=str,help='set \'run\' if debug done, otherwise, set debug')
     parser.add_argument('--rejection',default ='',type=str)
     parser.add_argument('--validation',action='store_true')
+    parser.add_argument('--semi',action='store_true')
     parser.add_argument('--modality',default='both', choices=['both', 'rgb', 'flow'])
     args = parser.parse_args()
     return args
