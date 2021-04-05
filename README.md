@@ -48,6 +48,11 @@ python denseflow.py --data_root=/home/esuh/data/ --dataset=cvpr/Track2.1/Train -
 --rejection=completed.txt : 이미 완료된 항목을 배제합니다.
 --validation : validation frame 추출시 동영상 경로가 조금 달라서 이 parse를 추가해야 합니다.
 --modality: rgb, flow, both 중에 추출할 frames을 선택할 수 있습니다.
+--semi: semi는 이름 경로가 달라서 추가 해줘야 합니다.
+
+python denseflow.py --data_root=/home/esuh/data/ --dataset=cvpr/Track2.2/HMDB51 --new_dir=flows --step=1 --mode=run --modality=rgb --semi
+python denseflow.py --data_root=/home/esuh/data/ --dataset=cvpr/Track2.2/Train --new_dir=flows --step=1 --mode=run --modality=rgb --semi --validation
+python denseflow.py --data_root=/home/esuh/data/ --dataset=cvpr/Track2.2/Validation --new_dir=flows --step=1 --mode=run --modality=rgb --semi --validation
 
 ```
 
