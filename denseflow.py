@@ -80,9 +80,12 @@ def dense_flow(augs):
     else:
         cls_list = ['drink',  'jump',  'pick',  'pour',  'push']
         if not args.validation:
+            cnt = 0
             for cls in cls_list:
                 if cls in video_name:
                     lbl = cls
+                    cnt+=1
+            if cnt >1: print(cnt, video_name)
             video_path=os.path.join(videos_root,lbl,video_name)
         else:
             video_path=os.path.join(videos_root,video_name)
@@ -90,7 +93,7 @@ def dense_flow(augs):
 
     while '\\' in video_path:
         video_path = video_path.replace('\\','/') # for windows
-    print("video_path:",video_path)
+    # print("video_path:",video_path)
     
     # provide two video-read methods: cv2.VideoCapture() and skvideo.io.vread(), both of which need ffmpeg support
 
@@ -104,7 +107,7 @@ def dense_flow(augs):
     except:
         print('{} read error! '.format(video_name))
         return 0
-    print("video name:",video_name)
+    # print("video name:",video_name)
     # if extract nothing, exit!
     if videocapture.sum()==0:
         print('Could not initialize capturing',video_name)
