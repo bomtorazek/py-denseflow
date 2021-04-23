@@ -13,6 +13,7 @@ import imageio
 
 def parse_args():
     parser = argparse.ArgumentParser(description="densely extract the video frames and optical flows")
+    parser.add_argument("--gamma", type=float)
     parser.add_argument("--data_dir", default="/UG2-2021/data/Track2.1/video/Train", type=str)
     parser.add_argument("--save_dir", default="/UG2-2021/results/optical_flow/tv-l1/Track2.1/raw", type=str)
     parser.add_argument("--num_workers", default=1, type=int)
@@ -65,7 +66,7 @@ def save_flows(image, flows, save_dir, video_name, num, bound):
     return 0
 
 
-def dense_flow(video_fpath, save_dir, step=1, bound=15):
+def dense_flow(video_fpath, save_dir, step=1, bound=15, gamma=None):
     fname = osp.splitext(osp.basename(video_fpath))[0]
 
     print(f"Processing - {fname}")
@@ -77,7 +78,13 @@ def dense_flow(video_fpath, save_dir, step=1, bound=15):
         ret, img = cap.read()
         if not ret:
             break
-        frame = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+        if gamma is not None:
+            img = img.astype(np.float32)
+            img = ((img / 255) ** gamma) * 255
+            img = img.astype(np.uint8)
+
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         frame_list.append(img)
 
     len_frame = len(frame_list)
@@ -129,7 +136,7 @@ def _main():
 
     # dense_flow(video_fpath_list[0], args.save_dir)
     with Pool(processes=args.num_workers) as pool:
-        pool.map(partial(dense_flow, save_dir=args.save_dir), video_fpath_list)
+        pool.map(partial(dense_flow, save_dir=args.save_dir, gamma=args.gamma), video_fpath_list)
 
 
 if __name__ == "__main__":
